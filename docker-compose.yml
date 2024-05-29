@@ -1,0 +1,44 @@
+version: '3'
+services:
+  mysql:
+    image: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: soham
+      MYSQL_PASSWORD: soham
+      MYSQL_DATABASE: product
+    networks:
+      - product-network
+
+  spring-boot-app:
+      build:
+        context: ./backend
+        dockerfile: Dockerfile
+      ports:
+        - "8080:8080"
+      depends_on:
+        - mysql
+      restart: always
+      environment:
+        SPRING_DATASOURCE_URL: jdbc:mysql://172.27.59.174:3307/product
+        SPRING_DATASOURCE_USERNAME: soham
+        SPRING_DATASOURCE_PASSWORD: soham
+      networks:
+      - product-network
+
+  react-app:
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+      depends_on:
+        - spring-boot-app
+      ports:
+        - "3002:80"
+      networks:
+      - product-network
+
+networks:
+  product-network:
+    driver: bridge
